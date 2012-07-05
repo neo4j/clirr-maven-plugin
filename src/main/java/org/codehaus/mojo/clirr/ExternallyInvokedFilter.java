@@ -12,7 +12,7 @@ public class ExternallyInvokedFilter implements ApiDifferenceFilter
 
     public static MessageCodeFilter EXTERNALLY_INVOKED_FILTER = new MessageCodeFilter(new HashSet<Integer>(), new HashSet<Integer>(){{
         // Ignore these errors if interface had an adaptor
-        add(MessageCodeFilter.Codes.MESSAGE_ADDED_TO_INTERFACE);
+        add(MessageCodeFilter.Codes.METHOD_ADDED_TO_INTERFACE);
     }});
     
     private JavaTypeRepository originalClasses;

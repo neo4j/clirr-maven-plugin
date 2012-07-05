@@ -1,6 +1,8 @@
 package org.codehaus.mojo.clirr;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.HashSet;
 import java.util.NoSuchElementException;
 
 import net.sf.clirr.core.ApiDifference;
@@ -10,6 +12,20 @@ public class SkipDeprecatedFilter implements ApiDifferenceFilter
 
     private JavaTypeRepository originalClasses;
 
+    public static MessageCodeFilter DEPRECATATED_FILTER = new MessageCodeFilter(new HashSet<Integer>(), new HashSet<Integer>(){{
+        // Errors that are excluded when they apply to 
+        // a deprecated class/field/method
+        
+        add(MessageCodeFilter.Codes.METHOD_REMOVED);
+        add(MessageCodeFilter.Codes.METHOD_DECREASED_VISIBILITY);
+        
+        add(MessageCodeFilter.Codes.CLASS_REMOVED);
+        add(MessageCodeFilter.Codes.CLASS_DECREASED_VISIBILITY);
+        
+        add(MessageCodeFilter.Codes.FIELD_REMOVED);
+        add(MessageCodeFilter.Codes.FIELD_DECREASED_VISIBILITY);
+    }});
+    
     public SkipDeprecatedFilter( JavaTypeRepository origClasses )
     {
         this.originalClasses = origClasses;
@@ -22,20 +38,33 @@ public class SkipDeprecatedFilter implements ApiDifferenceFilter
             if(apiDiff.getAffectedMethod() == null && apiDiff.getAffectedField() == null)
             {
                 Class<?> clazz = originalClasses.get( apiDiff.getAffectedClass() );
-                return clazz.getAnnotation( Deprecated.class ) == null;
+                if(clazz.getAnnotation( Deprecated.class ) != null)
+                {
+                    return DEPRECATATED_FILTER.shouldInclude( apiDiff );
+                }
             } else if(apiDiff.getAffectedMethod() != null )
             {
                 Method method = originalClasses.getMethod( apiDiff.getAffectedClass(), apiDiff.getAffectedMethod() );
-                return method.getAnnotation( Deprecated.class ) == null;
+                
+                if(method.getAnnotation( Deprecated.class ) != null)
+                {
+                    return DEPRECATATED_FILTER.shouldInclude( apiDiff );
+                }
             } else 
             {
-                // Fields, not supported yet. TODO
-                return true;
+                Field field = originalClasses.getField( apiDiff.getAffectedClass(), apiDiff.getAffectedField() );
+                
+                if(field.getAnnotation( Deprecated.class ) != null)
+                {
+                    return DEPRECATATED_FILTER.shouldInclude( apiDiff );
+                }
             }
+            
+            return true;
         } catch(NoSuchElementException e)
         {
-            // Ignore things that did not exist previously (they were obviously not deprecated)
-            return false;
+            // Include things that did not exist previously (they were obviously not deprecated)
+            return true;
         }
     }
 

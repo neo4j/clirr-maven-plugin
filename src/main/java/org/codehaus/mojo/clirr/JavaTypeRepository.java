@@ -1,5 +1,6 @@
 package org.codehaus.mojo.clirr;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -15,18 +16,38 @@ public class JavaTypeRepository
     
     private Map<String, Integer> modifierMap = new HashMap<String,Integer>()
     {{
-        put( "abstract", Modifier.ABSTRACT );
-        put( "final", Modifier.FINAL );
-        put( "interface", Modifier.INTERFACE );
-        put( "native", Modifier.NATIVE );
-        put( "private", Modifier.PRIVATE );
-        put( "protected", Modifier.PROTECTED );
-        put( "public", Modifier.PUBLIC );
-        put( "static", Modifier.STATIC );
-        put( "strict", Modifier.STRICT );
+        put( "abstract",     Modifier.ABSTRACT );
+        put( "final",        Modifier.FINAL );
+        put( "interface",    Modifier.INTERFACE );
+        put( "native",       Modifier.NATIVE );
+        put( "private",      Modifier.PRIVATE );
+        put( "protected",    Modifier.PROTECTED );
+        put( "public",       Modifier.PUBLIC );
+        put( "static",       Modifier.STATIC );
+        put( "strict",       Modifier.STRICT );
         put( "synchronized", Modifier.SYNCHRONIZED );
-        put( "transient", Modifier.TRANSIENT );
-        put( "volatile", Modifier.VOLATILE );
+        put( "transient",    Modifier.TRANSIENT );
+        put( "volatile",     Modifier.VOLATILE );
+    }};
+    
+    private Map<String, Class<?>> primitivesMap = new HashMap<String,Class<?>>()
+    {{
+        put( "void",    void.class );
+        put( "int",     int.class );
+        put( "long",    long.class );
+        put( "float",   float.class );
+        put( "double",  double.class );
+        put( "boolean", boolean.class );
+        put( "byte",    byte.class );
+        put( "char",    char.class );
+        // Primitive arrays
+        put( "int[]",     int[].class );
+        put( "long[]",    long[].class );
+        put( "float[]",   float[].class );
+        put( "double[]",  double[].class );
+        put( "boolean[]", boolean[].class );
+        put( "byte[]",    byte[].class );
+        put( "char[]",    char[].class );
     }};
 
     private JavaType[] types;
@@ -66,6 +87,11 @@ public class JavaTypeRepository
     {
         try
         {
+            if(primitivesMap.containsKey( className ))
+            {
+                return primitivesMap.get( className );
+            }
+            
             return classLoader.loadClass( className );
         }
         catch ( ClassNotFoundException e )
@@ -139,6 +165,23 @@ public class JavaTypeRepository
             }
         }
         throw new NoSuchElementException("No method named '" + methodName + "' in '" + clirrClassName + "' could be found.");
+    }
+
+    public Field getField( String className, String fieldName )
+    {
+        Class<?> clazz = get(className);
+        try
+        {
+            return clazz.getField( fieldName );
+        }
+        catch ( NoSuchFieldException e )
+        {
+            throw new NoSuchElementException("No field named '" + fieldName + "' in '" + className + "' could be found.");
+        }
+        catch ( SecurityException e )
+        {
+            throw new RuntimeException(e);
+        }
     }
 
 }

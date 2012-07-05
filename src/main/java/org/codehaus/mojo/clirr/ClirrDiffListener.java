@@ -72,6 +72,7 @@ public class ClirrDiffListener
                 return false;
             }
         }
+        
         return true;
     }
 

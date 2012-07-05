@@ -127,11 +127,22 @@ public abstract class AbstractClirrMojo
     protected File classesDirectory;
 
     /**
-     * Version to compare the current code against.
+     * Version to compare the current code against. This is by default the current
+     * project version, and then we use {{@link #versionsBack} to "hop" one version
+     * back. So the default is current version - 1.
      *
-     * @parameter expression="${comparisonVersion}" default-value="(,${project.version})"
+     * @parameter expression="${comparisonVersion}" default-value="${project.version}"
      */
     protected String comparisonVersion;
+    
+    /**
+     * Number of versions back from the comparison version to go to check
+     * compatibility. For instance, if this is 1, and comparisonVersion is 1.4,
+     * we will check against 1.3.
+     * 
+     * @parameter expression="${versionsBack}" default-value="1"
+     */
+    protected Integer versionsBack;
 
     /**
      * List of artifacts to compare the current code against. This
@@ -310,12 +321,12 @@ public abstract class AbstractClirrMojo
             filters.add( new SkipDeprecatedFilter(origClasses) );
         }
         
-        if(adapterAnnotations .size() > 0)
+        if(adapterAnnotations != null && adapterAnnotations.size() > 0)
         {
             filters.add( new AdaptedInterfacesFilter(adapterAnnotations, origClasses) );
         }
         
-        if(externallyInvokedAnnotations.size() > 0)
+        if(externallyInvokedAnnotations != null && externallyInvokedAnnotations.size() > 0)
         {
             filters.add( new ExternallyInvokedFilter(externallyInvokedAnnotations, origClasses) );
         }
@@ -443,7 +454,7 @@ public abstract class AbstractClirrMojo
         for ( Iterator iter = previousArtifacts.iterator();  iter.hasNext();  )
         {
             final Artifact a = (Artifact) iter.next();
-            System.out.println(a.getGroupId() + ":" + a.getArtifactId());
+            
             final Artifact pomArtifact = factory.createArtifact(
                     a.getGroupId(),
                     a.getArtifactId(),
@@ -514,12 +525,24 @@ public abstract class AbstractClirrMojo
         VersionRange range;
         try
         {
-            range = VersionRange.createFromVersionSpec( comparisonVersion );
+            if(versionsBack != null && versionsBack > 0)
+            {
+                while(--versionsBack >= 0)
+                {
+                    comparisonVersion = "(," + getComparisonArtifact(VersionRange.createFromVersionSpec( comparisonVersion )).getVersion() + ")";
+                }
+            }
+            return getComparisonArtifact(VersionRange.createFromVersionSpec( comparisonVersion ));
         }
         catch ( InvalidVersionSpecificationException e )
         {
             throw new MojoFailureException( "Invalid comparison version: " + e.getMessage() );
         }
+    }
+        
+    private Artifact getComparisonArtifact(VersionRange range)
+            throws MojoFailureException, MojoExecutionException
+        {
 
         Artifact previousArtifact;
         try
