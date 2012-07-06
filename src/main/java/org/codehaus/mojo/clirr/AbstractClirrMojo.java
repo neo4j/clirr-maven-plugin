@@ -143,6 +143,14 @@ public abstract class AbstractClirrMojo
      * @parameter expression="${versionsBack}" default-value="1"
      */
     protected Integer versionsBack;
+    
+    /**
+     * When finding version to compare to, ignore any maintenence versions found,
+     * only use minor versions (eg 1.1, 1.2 and not 1.2.1).
+     * 
+     * @parameter expression="${ignoreMaintenenceVersions}" default-value="true"
+     */
+    protected boolean ignoreMaintenenceVersions;
 
     /**
      * List of artifacts to compare the current code against. This
@@ -526,10 +534,10 @@ public abstract class AbstractClirrMojo
             {
                 while(--versionsBack >= 0)
                 {
-                    comparisonVersion = "(," + getComparisonArtifact(VersionRange.createFromVersionSpec( comparisonVersion )).getVersion() + ")";
+                    comparisonVersion = "(," + getComparisonArtifact(VersionRange.createFromVersionSpec( comparisonVersion ), ignoreMaintenenceVersions).getVersion() + ")";
                 }
             }
-            return getComparisonArtifact(VersionRange.createFromVersionSpec( comparisonVersion ));
+            return getComparisonArtifact(VersionRange.createFromVersionSpec( comparisonVersion ), ignoreMaintenenceVersions);
         }
         catch ( InvalidVersionSpecificationException e )
         {
@@ -537,16 +545,52 @@ public abstract class AbstractClirrMojo
         }
     }
         
-    private Artifact getComparisonArtifact(VersionRange range)
+    private Artifact getComparisonArtifact(VersionRange range, boolean ignoreMaintenenceVersions)
             throws MojoFailureException, MojoExecutionException
+    {
+    
+        Artifact previousArtifact = getArtifact( range );
+        
+        if(ignoreMaintenenceVersions && isMaintenenceVersion(previousArtifact.getVersion()))
         {
+            return getArtifact(VersionRange.createFromVersion( 
+                    getMinorVersionFromMaintenenceVersion(previousArtifact.getVersion()) ));
+        }
+        
+        return previousArtifact;
+    
+    }
+    
+    private String getMinorVersionFromMaintenenceVersion( String version )
+    {
+        if(version != null)
+        {
+            String[] parts = version.split( "\\." );
+            if(parts.length >= 2)
+            {
+                return parts[0] + "." + parts[1];
+            }
+        }
+        return version;
+    }
+
+    private boolean isMaintenenceVersion( String version )
+    {
+        return version != null && version.split( "\\." ).length > 2;
+    }
+
+    private Artifact getArtifact(VersionRange range)
+        throws MojoFailureException, MojoExecutionException
+    {
 
         Artifact previousArtifact;
         try
         {
+            
             previousArtifact = factory.createDependencyArtifact( project.getGroupId(), project.getArtifactId(), range,
                                                                  project.getPackaging(), null, Artifact.SCOPE_COMPILE );
 
+            
             if ( !previousArtifact.getVersionRange().isSelectedVersionKnown( previousArtifact ) )
             {
                 getLog().debug( "Searching for versions in range: " + previousArtifact.getVersionRange() );
