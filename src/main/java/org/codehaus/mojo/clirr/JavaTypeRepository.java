@@ -164,6 +164,7 @@ public class JavaTypeRepository
                 return method;
             }
         }
+        
         throw new NoSuchElementException("No method named '" + methodName + "' in '" + clirrClassName + "' could be found.");
     }
 

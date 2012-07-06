@@ -404,20 +404,17 @@ public abstract class AbstractClirrMojo
 
             ClassLoader origDepCL = createClassLoader( dependencies, previousArtifacts );
             final Set files = new HashSet();
-            final Set<URL> urls = new HashSet<URL>();
             for ( Iterator iter = previousArtifacts.iterator();  iter.hasNext();  )
             {
                 Artifact artifact = (Artifact) iter.next();
                 // Clirr expects JAR files, so let's not pass other artifact files.
                 // MCLIRR-39 Support for Maven Plugins, which are also JARs
                 if ( "jar".equals( artifact.getType() ) || "maven-plugin".equals( artifact.getType() ) ) {
-                    File f = new File( localRepository.getBasedir(), localRepository.pathOf( artifact ) ) ;
-                    files.add(f);
-                    urls.add(f.toURL());
+                    files.add(new File( localRepository.getBasedir(), localRepository.pathOf( artifact ) ));
                 }
             }
             
-            ClassLoader prevArtifactClassLoader = new URLClassLoader( urls.toArray( new URL[urls.size()] ) );
+            ClassLoader prevArtifactClassLoader = createClassLoader( dependencies, null );
             
             return new JavaTypeRepository(BcelTypeArrayBuilder.createClassSet( (File[]) files.toArray( new File[files.size()] ),
                                                         origDepCL, classFilter ), prevArtifactClassLoader);
