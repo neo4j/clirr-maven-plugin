@@ -15,7 +15,7 @@
   <artifactId>clirr-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
   <name>Clirr Maven Plugin</name>
-  <version>1.0</version>
+  <version>1.0.1-SNAPSHOT</version>
   
   <description>
     This is a specialized version of the Clirr Maven Plugin. It adds capabilities for excluding specific
