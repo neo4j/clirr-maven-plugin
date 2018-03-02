@@ -239,7 +239,7 @@ public abstract class AbstractClirrMojo
      * A list of fully-qualified class names for "Externally invoked" annotations.
      * This implies that while an interface (or abstract class) is part of a public
      * API, it only provides a facade into internal *implementations*. External
-     * implemenentations of the interface/class are not backwards-compatible,
+     * implementations of the interface/class are not backwards-compatible,
      * only external *invocation*.
      * 
      * If an interface has changed, but was previously annotated with one
