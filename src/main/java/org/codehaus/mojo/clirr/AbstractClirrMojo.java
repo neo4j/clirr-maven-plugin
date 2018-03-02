@@ -145,12 +145,12 @@ public abstract class AbstractClirrMojo
     protected Integer versionsBack;
     
     /**
-     * When finding version to compare to, ignore any maintenence versions found,
+     * When finding version to compare to, ignore any maintenance versions found,
      * only use minor versions (eg 1.1, 1.2 and not 1.2.1).
      * 
-     * @parameter expression="${ignoreMaintenenceVersions}" default-value="true"
+     * @parameter expression="${ignoreMaintenanceVersions}" default-value="true"
      */
-    protected boolean ignoreMaintenenceVersions;
+    protected boolean ignoreMaintenanceVersions;
 
     /**
      * List of artifacts to compare the current code against. This
@@ -239,7 +239,7 @@ public abstract class AbstractClirrMojo
      * A list of fully-qualified class names for "Externally invoked" annotations.
      * This implies that while an interface (or abstract class) is part of a public
      * API, it only provides a facade into internal *implementations*. External
-     * implemenentations of the interface/class are not backwards-compatible,
+     * implementations of the interface/class are not backwards-compatible,
      * only external *invocation*.
      * 
      * If an interface has changed, but was previously annotated with one
@@ -534,10 +534,10 @@ public abstract class AbstractClirrMojo
             {
                 while(--versionsBack >= 0)
                 {
-                    comparisonVersion = "(," + getComparisonArtifact(VersionRange.createFromVersionSpec( comparisonVersion ), ignoreMaintenenceVersions).getVersion() + ")";
+                    comparisonVersion = "(," + getComparisonArtifact(VersionRange.createFromVersionSpec( comparisonVersion ), ignoreMaintenanceVersions).getVersion() + ")";
                 }
             }
-            return getComparisonArtifact(VersionRange.createFromVersionSpec( comparisonVersion ), ignoreMaintenenceVersions);
+            return getComparisonArtifact(VersionRange.createFromVersionSpec( comparisonVersion ), ignoreMaintenanceVersions);
         }
         catch ( InvalidVersionSpecificationException e )
         {
@@ -545,23 +545,23 @@ public abstract class AbstractClirrMojo
         }
     }
         
-    private Artifact getComparisonArtifact(VersionRange range, boolean ignoreMaintenenceVersions)
+    private Artifact getComparisonArtifact(VersionRange range, boolean ignoreMaintenanceVersions)
             throws MojoFailureException, MojoExecutionException
     {
     
         Artifact previousArtifact = getArtifact( range );
         
-        if(ignoreMaintenenceVersions && isMaintenenceVersion(previousArtifact.getVersion()))
+        if(ignoreMaintenanceVersions && isMaintenanceVersion(previousArtifact.getVersion()))
         {
             return getArtifact(VersionRange.createFromVersion( 
-                    getMinorVersionFromMaintenenceVersion(previousArtifact.getVersion()) ));
+                    getMinorVersionFromMaintenanceVersion(previousArtifact.getVersion()) ));
         }
         
         return previousArtifact;
     
     }
     
-    private String getMinorVersionFromMaintenenceVersion( String version )
+    private String getMinorVersionFromMaintenanceVersion( String version )
     {
         if(version != null)
         {
@@ -574,7 +574,7 @@ public abstract class AbstractClirrMojo
         return version;
     }
 
-    private boolean isMaintenenceVersion( String version )
+    private boolean isMaintenanceVersion( String version )
     {
         return version != null && version.split( "\\." ).length > 2;
     }

@@ -104,21 +104,21 @@ public class JavaTypeRepository
     public Method getMethod( String clirrClassName, String clirrMethodDefinition )
     {
         // Input:
-        // public static org.neo4j.graphdb.Expander addRelationsipFilter(org.neo4j.helpers.Predicate, java.lang.String)
+        // public static org.neo4j.graphdb.Expander addRelationshipFilter(org.neo4j.helpers.Predicate, java.lang.String)
         
         if(clirrMethodDefinition == null)
         {
             throw new NoSuchElementException("No method named <null> in '" + clirrClassName + "' could be found.");
         }
         
-        // [..] addRelationsipFilter(org.neo4j.helpers.Predicate, java.lang.String)
+        // [..] addRelationshipFilter(org.neo4j.helpers.Predicate, java.lang.String)
         // to
-        // [..] addRelationsipFilter(org.neo4j.helpers.Predicate,java.lang.String)
+        // [..] addRelationshipFilter(org.neo4j.helpers.Predicate,java.lang.String)
         clirrMethodDefinition = clirrMethodDefinition.replace( ", ", "," );
         
         String[] parts = clirrMethodDefinition.split(" ");
         
-        // addRelationsipFilter(org.neo4j.helpers.Predicate)
+        // addRelationshipFilter(org.neo4j.helpers.Predicate)
         String [] nameAndArgs = parts[parts.length-1].split( "\\(" );
         String methodName = nameAndArgs[0];
         
