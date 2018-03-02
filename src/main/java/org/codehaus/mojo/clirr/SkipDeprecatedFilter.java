@@ -12,7 +12,7 @@ public class SkipDeprecatedFilter implements ApiDifferenceFilter
 
     private JavaTypeRepository originalClasses;
 
-    public static MessageCodeFilter DEPRECATATED_FILTER = new MessageCodeFilter(new HashSet<Integer>(), new HashSet<Integer>(){{
+    public static MessageCodeFilter DEPRECATED_FILTER = new MessageCodeFilter(new HashSet<Integer>(), new HashSet<Integer>(){{
         // Errors that are excluded when they apply to 
         // a deprecated class/field/method
         
@@ -40,7 +40,7 @@ public class SkipDeprecatedFilter implements ApiDifferenceFilter
                 Class<?> clazz = originalClasses.get( apiDiff.getAffectedClass() );
                 if(clazz.getAnnotation( Deprecated.class ) != null)
                 {
-                    return DEPRECATATED_FILTER.shouldInclude( apiDiff );
+                    return DEPRECATED_FILTER.shouldInclude( apiDiff );
                 }
             } else if(apiDiff.getAffectedMethod() != null )
             {
@@ -48,7 +48,7 @@ public class SkipDeprecatedFilter implements ApiDifferenceFilter
                 
                 if(method.getAnnotation( Deprecated.class ) != null)
                 {
-                    return DEPRECATATED_FILTER.shouldInclude( apiDiff );
+                    return DEPRECATED_FILTER.shouldInclude( apiDiff );
                 }
             } else 
             {
@@ -56,7 +56,7 @@ public class SkipDeprecatedFilter implements ApiDifferenceFilter
                 
                 if(field.getAnnotation( Deprecated.class ) != null)
                 {
-                    return DEPRECATATED_FILTER.shouldInclude( apiDiff );
+                    return DEPRECATED_FILTER.shouldInclude( apiDiff );
                 }
             }
             
